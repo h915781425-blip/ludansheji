@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>百家乐AI智能公式提示器</title>
+  <title>百家乐AI智能推演模拟器</title>
   
   <script src="https://registry.npmmirror.com/vue/3.3.4/files/dist/vue.global.prod.js"></script>
   
@@ -88,14 +88,20 @@
       width: 18vw; background: #333; color: #FFD700; border: 1px solid #555; 
       border-radius: 1vw; padding: 0.5vh 1vw; text-align: center; font-weight: bold; font-size: 3.5vw;
     }
-    /* 【新增】基码设定按钮样式 */
     .br-input-btn {
       width: 20vw; background: #222; color: #FFD700; border: 1px dashed #FFD700;
       border-radius: 1vw; padding: 0.5vh 0; text-align: center; font-weight: bold; font-size: 3.8vw; cursor: pointer;
     }
-    .br-highlight { background: rgba(255, 215, 0, 0.1); padding: 0.8vh 2vw; border-radius: 1vw; }
+    .br-highlight { background: rgba(255, 215, 0, 0.1); padding: 0.8vh 2vw; border-radius: 1vw; align-items: flex-start; }
     .text-gold { color: #FFD700; }
     .text-green { color: #32CD32; }
+
+    /* 【新增】资金快捷操作小按键 */
+    .mini-action-btn {
+      background: #222; color: #aaa; border: 1px solid #555; border-radius: 0.8vw; 
+      padding: 0.4vh 2vw; font-size: 2.8vw; margin-top: 0.8vh; cursor: pointer; transition: all 0.2s; display: inline-block;
+    }
+    .mini-action-btn:active { background: #444; color: #fff; border-color: #FFD700; }
 
     /* 智能公式提示条 */
     .formula-tracker-bar {
@@ -146,7 +152,7 @@
     .f-name { font-weight: bold; font-size: 3.8vw; }
     .f-detail { color: #aaa; font-size: 3vw; }
     
-    /* 【新增】基码筹码格子样式 */
+    /* 基码筹码格子样式 */
     .chips-grid { display: flex; flex-wrap: wrap; gap: 3vw; justify-content: center; margin-bottom: 2vh; }
     .chip-btn { width: 24vw; height: 12vw; background: #444; border: 2px solid #FFD700; color: #FFD700; border-radius: 2vw; display: flex; justify-content: center; align-items: center; font-size: 4vw; font-weight: bold; cursor: pointer; }
     .chip-custom { background: #b8860b; color: #000; border-color: #FFD700; }
@@ -210,9 +216,16 @@
         <div class="br-input-btn" @click="handleBaseUnitClick">¥ {{ baseUnit }}</div>
       </div>
     </div>
+    
     <div class="br-row br-highlight">
-      <div>当前余额: <span :class="currentBalance < 0 ? 'text-red' : 'text-gold'">¥ {{ currentBalance }}</span></div>
-      <div>实时盈亏: <span :class="profit < 0 ? 'text-red' : (profit > 0 ? 'text-green' : 'text-white')">{{ profit >= 0 ? '+' : '' }}{{ profit }}</span></div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start;">
+        <div>当前余额: <span :class="currentBalance < 0 ? 'text-red' : 'text-gold'">¥ {{ currentBalance }}</span></div>
+        <div class="mini-action-btn" @click="syncPrincipal">📥 设为本金</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end;">
+        <div>实时盈亏: <span :class="profit < 0 ? 'text-red' : (profit > 0 ? 'text-green' : 'text-white')">{{ profit >= 0 ? '+' : '' }}{{ profit }}</span></div>
+        <div class="mini-action-btn" @click="resetProfit">🔄 盈亏清零</div>
+      </div>
     </div>
   </div>
 
@@ -314,7 +327,6 @@ createApp({
       lastTapTime: 0,
       tapTimer: null,
 
-      // 基码选择相关
       showBaseUnitModal: false,
       lastBaseTapTime: 0,
       baseTapTimer: null
@@ -326,7 +338,6 @@ createApp({
     currentProgression() { return this.activeFormula.prog[this.currentStep]; },
     trackerClass() { return `tracker-${this.formulaStatus}`; },
     
-    // 实时计算金额
     currentBetAmount() { return this.currentProgression * this.baseUnit; },
     currentBalance() { return this.principal + this.profit; }
   },
@@ -336,7 +347,35 @@ createApp({
   methods: {
     getDirText(dirs) { return dirs.map(d => d === 'banker' ? '庄' : '闲').join(' '); },
     
-    // 公式按钮双击防抖
+    // 【新增】一键同步本金与当前余额
+    syncPrincipal() {
+      if (this.profit === 0) {
+        this.showToast('当前盈亏为0，无需同步');
+        return;
+      }
+      if (confirm(`确定将当前余额 (¥${this.currentBalance}) 作为新的初始本金吗？`)) {
+        // 先用变量存起来，避免相互计算影响
+        const targetBalance = this.currentBalance;
+        this.principal = targetBalance;
+        this.profit = 0;
+        this.historyStack = []; // 清空撤销栈，防止退回导致混乱
+        this.showToast('✅ 同步成功！资金已固化');
+      }
+    },
+
+    // 【新增】一键盈亏清零
+    resetProfit() {
+      if (this.profit === 0) {
+        this.showToast('盈亏已是0');
+        return;
+      }
+      if (confirm('确定将盈亏强行清零吗？(余额将恢复至初始本金)')) {
+        this.profit = 0;
+        this.historyStack = [];
+        this.showToast('✅ 盈亏已清零，重新出发！');
+      }
+    },
+    
     handleFormulaSelectClick(e) {
       const currentTime = new Date().getTime();
       const tapLength = currentTime - this.lastTapTime;
@@ -349,7 +388,6 @@ createApp({
       this.lastTapTime = currentTime;
     },
 
-    // 【新增】基码按钮双击防抖
     handleBaseUnitClick(e) {
       const currentTime = new Date().getTime();
       const tapLength = currentTime - this.lastBaseTapTime;
@@ -362,14 +400,12 @@ createApp({
       this.lastBaseTapTime = currentTime;
     },
 
-    // 【新增】设置预设基码
     setBaseUnit(val) {
       this.baseUnit = val;
       this.showBaseUnitModal = false;
       this.showToast(`成功！下注基数已设为 ¥${val}`);
     },
 
-    // 【新增】设置自定义基码
     setCustomBaseUnit() {
       const val = prompt('请输入您想设置的自定义基码金额:', this.baseUnit);
       const parsed = parseInt(val);
