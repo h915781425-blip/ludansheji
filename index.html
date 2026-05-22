@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>百家乐路单设计器</title>
+  
+  <script src="https://registry.npmmirror.com/vue/3.3.4/files/dist/vue.global.prod.js"></script>
+  
+  <style>
+    [v-cloak] { display: none !important; }
+    :root { --rpx: 0.1333vw; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    html, body { 
+      background-color: #0b1c14;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+      height: 100%; width: 100%; overflow: hidden; position: fixed; top: 0; left: 0;
+    }
+
+    .table-container { 
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle, #2E8B57 0%, #0B3B17 100%);
+      display: flex; flex-direction: column; color: white; overflow: hidden;
+      padding-top: max(2vh, env(safe-area-inset-top, 20px));
+    }
+
+    /* 顶部标题栏 */
+    .top-header {
+      text-align: center; font-size: 5vw; font-weight: bold; color: #FFD700;
+      padding: 1vh 0 2vh 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* 路单面板填满所有核心高度 */
+    .macau-roads-panel-clean {
+      flex: 1 1 auto;
+      margin: 0 2vw 2vh 2vw; background-color: #ffffff; border: 2px solid #FFD700; border-radius: 1.5vw;
+      padding: 0.5vh 1vw; color: #333; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    
+    .roads-scroll-view { 
+      width: 100%; flex: 1; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; 
+    }
+    .roads-scroll-content { display: inline-block; height: 100%; vertical-align: top; }
+
+    .road-title-strip { font-size: 3vw; font-weight: bold; color: #777; padding-left: 1vw; padding-top: 1vh;}
+    .road-title-strip-gold { font-size: 3vw; font-weight: bold; color: #b8860b; padding-left: 1vw; border-top: 1px dashed #ccc; margin-top: 1vh; padding-top: 1vh;}
+
+    /* 路单格子自适应高度 */
+    .bead-row-container, .bigroad-row-container { 
+      height: calc(50% - 3vh); display: flex; flex-direction: row; 
+      background: #fff; border-top: 1px solid #e0e0e0; border-left: 1px solid #e0e0e0;
+    }
+    .bead-column-unit, .bigroad-column-unit { display: flex; flex-direction: column; width: 6vw; height: 100%; }
+    .bead-cell-unit, .bigroad-cell-unit { 
+      flex: 1; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; 
+      display: flex; justify-content: center; align-items: center; box-sizing: border-box; 
+    }
+    
+    .bead-ball-unit { 
+      width: 4.5vw; height: 4.5vw; border-radius: 50%; font-size: 2.5vw; font-weight: bold; 
+      color: white; display: flex; justify-content: center; align-items: center;
+    }
+    .bigroad-circle-unit { 
+      width: 4vw; height: 4vw; border-radius: 50%; border: 2px solid transparent; position: relative;
+    }
+
+    .bg-banker { background-color: #d90000; }
+    .bg-player { background-color: #1E90FF; }
+    .bg-tie { background-color: #32CD32; }
+    .b-banker { border-color: #d90000; }
+    .b-player { border-color: #1E90FF; }
+    .t-slash { position: absolute; color: #32CD32; font-size: 3vw; font-weight: bold; top: -20%; left: 10%; transform: scaleX(1.3); }
+
+    /* 底部录入控制台 */
+    .bottom-designer-deck { 
+      flex-shrink: 0; padding: 2vh 4vw max(3vh, env(safe-area-inset-bottom, 20px)) 4vw;
+      background-color: rgba(0, 0, 0, 0.85); border-top: 2px solid #FFD700; border-radius: 3vw 3vw 0 0;
+    }
+    
+    .action-grid {
+      display: flex; justify-content: space-between; gap: 3vw; margin-bottom: 2vh;
+    }
+    
+    .btn-record {
+      flex: 1; height: 14vw; border: none; border-radius: 2vw; font-size: 4.5vw; font-weight: bold;
+      color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.1s;
+    }
+    .btn-record:active { transform: scale(0.95); }
+    
+    .sub-action-grid { display: flex; justify-content: space-between; gap: 3vw; }
+    .btn-sub {
+      flex: 1; padding: 1.5vh 0; border: none; border-radius: 1.5vw; font-size: 3.5vw; font-weight: bold;
+      cursor: pointer; background-color: #555; color: white;
+    }
+    .btn-clear { background-color: #B22222; }
+
+  </style>
+</head>
+<body>
+
+<div id="app" class="table-container" v-cloak>
+  
+  <div class="top-header">百家乐路单设计器</div>
+
+  <div class="macau-roads-panel-clean">
+    <div class="roads-scroll-view" ref="roadsScroll">
+      <div class="roads-scroll-content">
+        <div class="road-title-strip">珠盘路</div>
+        <div class="bead-row-container">
+          <div class="bead-column-unit" v-for="(col, cIndex) in displayBeadPlate" :key="'bead-'+cIndex">
+            <div class="bead-cell-unit" v-for="(cell, rIndex) in col" :key="'bead-cell-'+rIndex">
+              <div class="bead-ball-unit" :class="cell === 'banker' ? 'bg-banker' : (cell === 'player' ? 'bg-player' : (cell === 'tie' ? 'bg-tie' : ''))">
+                <span v-if="cell !== 'empty'">{{cell === 'banker' ? '庄' : (cell === 'player' ? '闲' : '和')}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="road-title-strip-gold">大路</div>
+        <div class="bigroad-row-container">
+          <div class="bigroad-column-unit" v-for="(col, cIndex) in displayBigRoad" :key="'big-'+cIndex">
+            <div class="bigroad-cell-unit" v-for="(cell, rIndex) in col" :key="'big-cell-'+rIndex">
+              <div class="bigroad-circle-unit" v-if="cell.winner !== 'empty'" :class="cell.winner === 'banker' ? 'b-banker' : (cell.winner === 'player' ? 'b-player' : '')">
+                <span class="t-slash" v-if="cell.hasTie">/</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-designer-deck">
+    <div class="action-grid">
+      <button class="btn-record bg-player" @click="addRecord('player')">闲 PLAYER</button>
+      <button class="btn-record bg-tie" @click="addRecord('tie')">和 TIE</button>
+      <button class="btn-record bg-banker" @click="addRecord('banker')">庄 BANKER</button>
+    </div>
+    <div class="sub-action-grid">
+      <button class="btn-sub" @click="undoRecord">↩ 撤销上一步</button>
+      <button class="btn-sub btn-clear" @click="clearRecords">🗑 清空路图</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      rawHistory: [],
+      displayBeadPlate: [],
+      displayBigRoad: []
+    }
+  },
+  mounted() {
+    this.resetAllRoadMatrix();
+  },
+  methods: {
+    // 初始化空白矩阵
+    resetAllRoadMatrix() {
+      let beadMatrix = [];
+      for(let c=0; c<20; c++) { 
+        let col = []; 
+        for(let r=0; r<6; r++) col.push('empty'); 
+        beadMatrix.push(col);
+      }
+      
+      let bigMatrix = [];
+      for (let c = 0; c < 40; c++) { 
+        let col = [];
+        for (let r = 0; r < 6; r++) col.push({ winner: 'empty', hasTie: false }); 
+        bigMatrix.push(col);
+      }
+      
+      this.displayBeadPlate = beadMatrix; 
+      this.displayBigRoad = bigMatrix;
+      this.$nextTick(() => { if(this.$refs.roadsScroll) this.$refs.roadsScroll.scrollLeft = 0; });
+    },
+
+    // 录入新结果
+    addRecord(result) {
+      this.rawHistory.push(result);
+      this.updateRoads();
+    },
+
+    // 撤销上一步
+    undoRecord() {
+      if (this.rawHistory.length > 0) {
+        this.rawHistory.pop();
+        this.updateRoads();
+      }
+    },
+
+    // 清空重置
+    clearRecords() {
+      this.rawHistory = [];
+      this.resetAllRoadMatrix();
+    },
+
+    // 触发矩阵更新与滚动
+    updateRoads() {
+      if (this.rawHistory.length === 0) {
+        this.resetAllRoadMatrix();
+        return;
+      }
+      
+      let roadsData = this.generatePureMacauRoads(this.rawHistory);
+      this.displayBeadPlate = roadsData.bead; 
+      this.displayBigRoad = roadsData.big;
+      
+      // 自动向右滚动到底
+      this.$nextTick(() => { 
+        if(this.$refs.roadsScroll) {
+          const el = this.$refs.roadsScroll;
+          el.scrollLeft = el.scrollWidth;
+        }
+      });
+    },
+
+    // 核心算法：生成标准澳门路单矩阵 (沿用原版逻辑)
+    generatePureMacauRoads(historyArray) {
+      // 1. 珠盘路计算
+      let beadMatrix = []; 
+      let bCol = [];
+      for(let i=0; i<historyArray.length; i++) { 
+        bCol.push(historyArray[i]); 
+        if(bCol.length === 6) { beadMatrix.push(bCol); bCol = []; } 
+      }
+      if(bCol.length > 0) { 
+        while(bCol.length < 6) bCol.push('empty'); 
+        beadMatrix.push(bCol);
+      }
+      while(beadMatrix.length < 20) { 
+        beadMatrix.push(['empty','empty','empty','empty','empty','empty']);
+      }
+
+      // 2. 大路计算
+      let bigMatrix = [];
+      const createCol = () => { 
+        let col = [];
+        for(let i=0; i<6; i++) col.push({ winner: 'empty', hasTie: false }); 
+        return col; 
+      };
+      
+      bigMatrix.push(createCol());
+      let currentC = 0;
+      let currentR = 0; 
+      let lastWin = null; 
+      let streakStartCol = 0;
+      
+      for (let i = 0; i < historyArray.length; i++) {
+        let res = historyArray[i];
+        if (res === 'tie') {
+          if (lastWin === null) bigMatrix[currentC][currentR] = { winner: 'tie', hasTie: true };
+          else bigMatrix[currentC][currentR].hasTie = true;
+          continue;
+        }
+        
+        if (lastWin === null) { 
+          bigMatrix[currentC][currentR].winner = res;
+          lastWin = res; streakStartCol = currentC; 
+          continue; 
+        }
+        
+        if (res === lastWin) {
+          if (currentR + 1 < 6 && bigMatrix[currentC][currentR + 1].winner === 'empty') { 
+            currentR++;
+          } else { 
+            currentC++; 
+            while(currentC >= bigMatrix.length) bigMatrix.push(createCol()); 
+          }
+          bigMatrix[currentC][currentR].winner = res;
+        } else {
+          currentC = streakStartCol + 1; currentR = 0;
+          while(currentC >= bigMatrix.length) bigMatrix.push(createCol());
+          while (bigMatrix[currentC][currentR].winner !== 'empty') { 
+            currentC++; 
+            if (currentC >= bigMatrix.length) bigMatrix.push(createCol());
+          }
+          bigMatrix[currentC][currentR].winner = res; 
+          lastWin = res; 
+          streakStartCol = currentC;
+        }
+      }
+      while(bigMatrix.length < 40) bigMatrix.push(createCol());
+      
+      return { bead: beadMatrix, big: bigMatrix };
+    }
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
