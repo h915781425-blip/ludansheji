@@ -203,7 +203,7 @@ createApp({
       this.resetAllRoadMatrix();
     },
 
-    // 触发矩阵更新与滚动
+    // 触发矩阵更新与智能跟随滚动
     updateRoads() {
       if (this.rawHistory.length === 0) {
         this.resetAllRoadMatrix();
@@ -214,18 +214,36 @@ createApp({
       this.displayBeadPlate = roadsData.bead; 
       this.displayBigRoad = roadsData.big;
       
-      // 自动向右滚动到底
+      // 1. 找出当前大路实际画到的最后一列索引
+      let lastValidColIndex = 0;
+      for (let c = roadsData.big.length - 1; c >= 0; c--) {
+        if (roadsData.big[c][0].winner !== 'empty') {
+          lastValidColIndex = c;
+          break;
+        }
+      }
+
+      // 2. 智能滚动逻辑
       this.$nextTick(() => { 
         if(this.$refs.roadsScroll) {
           const el = this.$refs.roadsScroll;
-          el.scrollLeft = el.scrollWidth;
+          const cols = el.querySelectorAll('.bigroad-column-unit');
+          
+          if (cols[lastValidColIndex]) {
+            const targetCol = cols[lastValidColIndex];
+            // 只在目标列超出可视区时才进行平滑滚动
+            targetCol.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest', 
+              inline: 'nearest' 
+            });
+          }
         }
       });
     },
 
-    // 核心算法：生成标准澳门路单矩阵 (沿用原版逻辑)
+    // 核心算法：生成标准澳门路单矩阵
     generatePureMacauRoads(historyArray) {
-      // 1. 珠盘路计算
       let beadMatrix = []; 
       let bCol = [];
       for(let i=0; i<historyArray.length; i++) { 
@@ -240,7 +258,6 @@ createApp({
         beadMatrix.push(['empty','empty','empty','empty','empty','empty']);
       }
 
-      // 2. 大路计算
       let bigMatrix = [];
       const createCol = () => { 
         let col = [];
