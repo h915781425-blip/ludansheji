@@ -255,17 +255,15 @@ createApp({
       return dirs.map(d => d === 'banker' ? '庄' : '闲').join(' ');
     },
     
-    // 整合后的移动端防抖双击判定，彻底解决点击穿透闪退问题
+    // 移动端防抖双击判定
     handleFormulaSelectClick(e) {
       const currentTime = new Date().getTime();
       const tapLength = currentTime - this.lastTapTime;
       
-      // 将双击的判定时间放宽到 400 毫秒，按起来更从容
       if (tapLength < 400 && tapLength > 0) {
         clearTimeout(this.tapTimer);
         this.showFormulaModal = true;
       } else {
-        // 单击时开启定时器提示（如果嫌烦可以把下面这句 showToast 删掉）
         this.tapTimer = setTimeout(() => {
           this.showToast('请快速双击打开菜单');
         }, 400);
@@ -304,7 +302,9 @@ createApp({
       // 如果公式正在执行中，先结算状态
       if (this.formulaStatus === 'running') {
         if (result === 'tie') {
-          // 和局：不计入胜负，步数不变
+          // 【核心修改】和局：立刻重置回第一口
+          this.currentStep = 0;
+          this.showToast('碰到和局，公式重新开始计算');
         } else if (result === this.targetSide) {
           // 命中！
           this.formulaStatus = 'won';
