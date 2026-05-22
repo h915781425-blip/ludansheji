@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>百家乐智能公式提示器</title>
+  <title>百家乐AI智能公式提示器</title>
   
   <script src="https://registry.npmmirror.com/vue/3.3.4/files/dist/vue.global.prod.js"></script>
   
@@ -22,13 +22,13 @@
       position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       background: radial-gradient(circle, #2E8B57 0%, #0B3B17 100%);
       display: flex; flex-direction: column; color: white; overflow: hidden;
-      padding-top: max(2vh, env(safe-area-inset-top, 20px));
+      padding-top: max(1vh, env(safe-area-inset-top, 10px));
     }
 
     /* 顶部标题栏 */
     .top-header {
       text-align: center; font-size: 5vw; font-weight: bold; color: #FFD700;
-      padding: 1vh 0 2vh 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      padding: 1vh 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
     /* 路单面板 */
@@ -63,11 +63,45 @@
     .b-player { border-color: #1E90FF; }
     .t-slash { position: absolute; color: #32CD32; font-size: 3vw; font-weight: bold; top: -20%; left: 10%; transform: scaleX(1.3); }
 
+    /* AI 智能预测舱 */
+    .ai-prediction-deck {
+      margin: 0 2vw 0.5vh 2vw; padding: 1vh 2vw; border-radius: 1.5vw;
+      background: rgba(0, 0, 0, 0.7); border: 1px solid #4da6ff;
+      display: flex; align-items: center; box-shadow: 0 2px 8px rgba(77, 166, 255, 0.3);
+    }
+    .ai-badge { background: #4da6ff; color: #000; font-size: 3vw; font-weight: 900; padding: 0.5vh 1.5vw; border-radius: 1vw; margin-right: 2vw; white-space: nowrap; }
+    .ai-result-box { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .ai-recommendation { font-size: 4vw; font-weight: bold; margin-bottom: 0.2vh; color: #fff;}
+    .ai-reason { font-size: 2.5vw; color: #aaa; }
+    .ai-red { color: #ff4d4d; font-size: 4.5vw; }
+    .ai-blue { color: #4da6ff; font-size: 4.5vw; }
+
+    /* 资金筹码管理舱 */
+    .bankroll-deck {
+      margin: 0.5vh 2vw; padding: 1vh 3vw; border-radius: 1.5vw;
+      background: rgba(20, 20, 20, 0.85); border: 1px solid #FFD700;
+      display: flex; flex-direction: column; gap: 1vh;
+    }
+    .br-row { display: flex; justify-content: space-between; align-items: center; font-size: 3.5vw; font-weight: bold; color: #fff; }
+    .br-group { display: flex; align-items: center; gap: 1vw; }
+    .br-input { 
+      width: 18vw; background: #333; color: #FFD700; border: 1px solid #555; 
+      border-radius: 1vw; padding: 0.5vh 1vw; text-align: center; font-weight: bold; font-size: 3.5vw;
+    }
+    /* 【新增】基码设定按钮样式 */
+    .br-input-btn {
+      width: 20vw; background: #222; color: #FFD700; border: 1px dashed #FFD700;
+      border-radius: 1vw; padding: 0.5vh 0; text-align: center; font-weight: bold; font-size: 3.8vw; cursor: pointer;
+    }
+    .br-highlight { background: rgba(255, 215, 0, 0.1); padding: 0.8vh 2vw; border-radius: 1vw; }
+    .text-gold { color: #FFD700; }
+    .text-green { color: #32CD32; }
+
     /* 智能公式提示条 */
     .formula-tracker-bar {
-      margin: 0 2vw 1vh 2vw; height: 6vh; border-radius: 1.5vw;
+      margin: 0.5vh 2vw 1vh 2vw; height: 5.5vh; border-radius: 1.5vw;
       display: flex; align-items: center; justify-content: center;
-      font-size: 3.8vw; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+      font-size: 3.5vw; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.4);
       transition: all 0.3s ease;
     }
     .tracker-idle { background-color: rgba(0,0,0,0.6); color: #aaa; border: 1px dashed #777; }
@@ -82,16 +116,16 @@
 
     /* 底部录入与公式控制台 */
     .bottom-designer-deck { 
-      flex-shrink: 0; padding: 2vh 4vw max(2vh, env(safe-area-inset-bottom, 15px)) 4vw;
+      flex-shrink: 0; padding: 1.5vh 4vw max(1.5vh, env(safe-area-inset-bottom, 10px)) 4vw;
       background-color: rgba(0, 0, 0, 0.85); border-top: 2px solid #FFD700; border-radius: 3vw 3vw 0 0;
     }
     
-    .formula-controls { display: flex; justify-content: space-between; gap: 3vw; margin-bottom: 2vh; }
+    .formula-controls { display: flex; justify-content: space-between; gap: 3vw; margin-bottom: 1.5vh; }
     .btn-f-start { flex: 1; background-color: #FFD700; color: #000; border: none; padding: 1.2vh 0; border-radius: 1.5vw; font-size: 3.5vw; font-weight: 900; cursor: pointer; }
     .btn-f-select { flex: 1.5; background-color: #333; color: #FFD700; border: 1px solid #FFD700; padding: 1.2vh 0; border-radius: 1.5vw; font-size: 3.2vw; font-weight: bold; cursor: pointer; }
     .btn-f-stop { flex: 1; background-color: #ff4d4d; color: #fff; border: none; padding: 1.2vh 0; border-radius: 1.5vw; font-size: 3.5vw; font-weight: 900; cursor: pointer; }
 
-    .action-grid { display: flex; justify-content: space-between; gap: 3vw; margin-bottom: 2vh; }
+    .action-grid { display: flex; justify-content: space-between; gap: 3vw; margin-bottom: 1.5vh; }
     .btn-record { flex: 1; height: 13vw; border: none; border-radius: 2vw; font-size: 4.5vw; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.1s; }
     .btn-record:active { transform: scale(0.95); }
     
@@ -99,15 +133,23 @@
     .btn-sub { flex: 1; padding: 1.2vh 0; border: none; border-radius: 1.5vw; font-size: 3.5vw; font-weight: bold; cursor: pointer; background-color: #555; color: white; }
     .btn-clear { background-color: #B22222; }
 
-    /* 公式选择下拉弹窗 */
+    /* 模态框通用 */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
     .modal-content { background: #222; border: 2px solid #FFD700; border-radius: 2vw; width: 85vw; padding: 2vh 4vw; color: white; }
     .modal-title { font-size: 4.5vw; font-weight: bold; text-align: center; margin-bottom: 2vh; color: #FFD700; }
+    .modal-close { width: 100%; background: #555; color: white; border: none; padding: 1.5vh 0; border-radius: 1.5vw; font-size: 3.8vw; margin-top: 1vh; font-weight: bold; }
+
+    /* 公式列表模态框 */
+    .formulas-list-container { max-height: 50vh; overflow-y: auto; margin-bottom: 1vh; padding-right: 1vw;}
     .formula-item { padding: 1.5vh 3vw; background: #333; margin-bottom: 1.5vh; border-radius: 1.5vw; font-size: 3.5vw; display: flex; flex-direction: column; gap: 0.5vh; border: 1px solid transparent; }
     .formula-item-active { border-color: #FFD700; background: rgba(255,215,0,0.1); }
     .f-name { font-weight: bold; font-size: 3.8vw; }
     .f-detail { color: #aaa; font-size: 3vw; }
-    .modal-close { width: 100%; background: #555; color: white; border: none; padding: 1.5vh 0; border-radius: 1.5vw; font-size: 3.8vw; margin-top: 1vh; font-weight: bold; }
+    
+    /* 【新增】基码筹码格子样式 */
+    .chips-grid { display: flex; flex-wrap: wrap; gap: 3vw; justify-content: center; margin-bottom: 2vh; }
+    .chip-btn { width: 24vw; height: 12vw; background: #444; border: 2px solid #FFD700; color: #FFD700; border-radius: 2vw; display: flex; justify-content: center; align-items: center; font-size: 4vw; font-weight: bold; cursor: pointer; }
+    .chip-custom { background: #b8860b; color: #000; border-color: #FFD700; }
 
   </style>
 </head>
@@ -115,7 +157,7 @@
 
 <div id="app" class="table-container" v-cloak>
   
-  <div class="top-header">公式打分提示器</div>
+  <div class="top-header">AI 算路与资金推演</div>
 
   <div class="macau-roads-panel-clean">
     <div class="roads-scroll-view" ref="roadsScroll">
@@ -145,21 +187,48 @@
     </div>
   </div>
 
+  <div class="ai-prediction-deck">
+    <div class="ai-badge">AI算路</div>
+    <div class="ai-result-box">
+      <div class="ai-recommendation">
+        <template v-if="aiResult === 'banker'">下口推荐打：<span class="ai-red">庄 BANKER</span></template>
+        <template v-else-if="aiResult === 'player'">下口推荐打：<span class="ai-blue">闲 PLAYER</span></template>
+        <template v-else>{{ aiResultText }}</template>
+      </div>
+      <div class="ai-reason">{{ aiReason }}</div>
+    </div>
+  </div>
+
+  <div class="bankroll-deck">
+    <div class="br-row">
+      <div class="br-group">
+        <span>初始本金:</span>
+        <input type="number" v-model.number="principal" class="br-input" placeholder="输入金额">
+      </div>
+      <div class="br-group">
+        <span>起始基码:</span>
+        <div class="br-input-btn" @click="handleBaseUnitClick">¥ {{ baseUnit }}</div>
+      </div>
+    </div>
+    <div class="br-row br-highlight">
+      <div>当前余额: <span :class="currentBalance < 0 ? 'text-red' : 'text-gold'">¥ {{ currentBalance }}</span></div>
+      <div>实时盈亏: <span :class="profit < 0 ? 'text-red' : (profit > 0 ? 'text-green' : 'text-white')">{{ profit >= 0 ? '+' : '' }}{{ profit }}</span></div>
+    </div>
+  </div>
+
   <div class="formula-tracker-bar" :class="trackerClass">
-    <span v-if="formulaStatus === 'idle'">按“开始公式”捕捉切入点</span>
+    <span v-if="formulaStatus === 'idle'">按“开始推演”自动计算并下注</span>
     <span v-else-if="formulaStatus === 'running'">
-      第{{currentStep + 1}}口：买<span :class="targetSide === 'banker' ? 'text-red' : 'text-blue'">{{targetSide === 'banker' ? '庄' : '闲'}}</span>，注码 [ {{currentProgression}} ]
+      第{{currentStep + 1}}口：买<span :class="targetSide === 'banker' ? 'text-red' : 'text-blue'">{{targetSide === 'banker' ? '庄' : '闲'}}</span>，金额 [ ¥ {{ currentBetAmount }} ]
     </span>
-    <span v-else-if="formulaStatus === 'won'">🎉 命中收米！等待下个切入点</span>
+    <span v-else-if="formulaStatus === 'won'">🎉 命中收米！请等待下个切入点</span>
     <span v-else-if="formulaStatus === 'lost'">❌ 缆断了，重新寻找路子</span>
   </div>
 
   <div class="bottom-designer-deck">
-    
     <div class="formula-controls">
-      <button v-if="formulaStatus === 'running'" class="btn-f-stop" @click="stopFormula">⏹ 停止执行</button>
-      <button v-else class="btn-f-start" @click="startFormula">▶️ 开始公式</button>
-      
+      <button v-if="formulaStatus === 'running'" class="btn-f-stop" @click="stopFormula">⏹ 停止公式</button>
+      <button v-else class="btn-f-start" @click="startFormula">▶️ 开始公式推演</button>
       <button class="btn-f-select" @click="handleFormulaSelectClick">
         ⚙️ {{ activeFormula.name }}
       </button>
@@ -173,19 +242,36 @@
     
     <div class="sub-action-grid">
       <button class="btn-sub" @click="undoRecord">↩ 撤销上一步</button>
-      <button class="btn-sub btn-clear" @click="clearRecords">🗑 清空路图</button>
+      <button class="btn-sub btn-clear" @click="clearRecords">🗑 清空重置</button>
     </div>
   </div>
 
   <div class="modal-overlay" v-if="showFormulaModal" @click.self="showFormulaModal = false">
     <div class="modal-content">
       <div class="modal-title">选择打法公式</div>
-      <div class="formula-item" v-for="f in formulas" :key="f.id" :class="{'formula-item-active': activeFormulaId === f.id}" @click="selectFormula(f.id)">
-        <span class="f-name">{{ f.name }}</span>
-        <span class="f-detail">方向: {{ getDirText(f.dirs) }}</span>
-        <span class="f-detail">注码: {{ f.prog.join(' - ') }}</span>
+      <div class="formulas-list-container">
+        <div class="formula-item" v-for="f in formulas" :key="f.id" :class="{'formula-item-active': activeFormulaId === f.id}" @click="selectFormula(f.id)">
+          <span class="f-name">{{ f.name }}</span>
+          <span class="f-detail">方向: {{ getDirText(f.dirs) }}</span>
+          <span class="f-detail">真实金额: {{ f.prog.map(p => p * baseUnit).join(' - ') }}</span>
+        </div>
       </div>
       <button class="modal-close" @click="showFormulaModal = false">关闭 (已选定)</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" v-if="showBaseUnitModal" @click.self="showBaseUnitModal = false">
+    <div class="modal-content">
+      <div class="modal-title">设置起始基码 (基数)</div>
+      <div class="chips-grid">
+        <div class="chip-btn" @click="setBaseUnit(10)">¥ 10</div>
+        <div class="chip-btn" @click="setBaseUnit(50)">¥ 50</div>
+        <div class="chip-btn" @click="setBaseUnit(100)">¥ 100</div>
+        <div class="chip-btn" @click="setBaseUnit(500)">¥ 500</div>
+        <div class="chip-btn" @click="setBaseUnit(1000)">¥ 1000</div>
+        <div class="chip-btn chip-custom" @click="setCustomBaseUnit">自定义</div>
+      </div>
+      <button class="modal-close" @click="showBaseUnitModal = false">关闭</button>
     </div>
   </div>
 
@@ -201,74 +287,99 @@ createApp({
       displayBeadPlate: [],
       displayBigRoad: [],
       
-      // 公式引擎核心数据
+      aiResult: null,
+      aiResultText: '监控中...',
+      aiReason: '至少录入 3 口历史数据即可激活智能推牌',
+
+      principal: 10000,   // 初始本金
+      baseUnit: 100,      // 基码金额
+      profit: 0,          // 实时盈亏
+      historyStack: [],   // 用于完美撤销的状态栈
+
       formulas: [
-        { 
-          id: 'jump_5', 
-          name: '五式单跳缆 (专属)', 
-          prog: [1, 3, 7, 15, 32], 
-          dirs: ['banker', 'player', 'banker', 'player', 'banker'] 
-        },
-        { 
-          id: 'long_b_5', 
-          name: '五式长庄缆 (打连)', 
-          prog: [1, 2, 4, 8, 16], 
-          dirs: ['banker', 'banker', 'banker', 'banker', 'banker'] 
-        },
-        { 
-          id: 'long_p_5', 
-          name: '五式长闲缆 (打连)', 
-          prog: [1, 2, 4, 8, 16], 
-          dirs: ['player', 'player', 'player', 'player', 'player'] 
-        }
+        { id: 'jump_b_5', name: '五式单跳起庄 (激进)', prog: [1, 3, 7, 15, 31], dirs: ['banker', 'player', 'banker', 'player', 'banker'] },
+        { id: 'jump_p_5', name: '五式单跳起闲 (激进)', prog: [1, 3, 7, 15, 31], dirs: ['player', 'banker', 'player', 'banker', 'player'] },
+        { id: 'long_b_6', name: '六式长庄 (平民翻倍)', prog: [1, 2, 4, 8, 16, 32], dirs: ['banker', 'banker', 'banker', 'banker', 'banker', 'banker'] },
+        { id: 'long_p_6', name: '六式长闲 (平民翻倍)', prog: [1, 2, 4, 8, 16, 32], dirs: ['player', 'player', 'player', 'player', 'player', 'player'] },
+        { id: 'fibo_b_6', name: '六式长庄 (抗震斐波那契)', prog: [1, 1, 2, 3, 5, 8], dirs: ['banker', 'banker', 'banker', 'banker', 'banker', 'banker'] },
+        { id: 'bbpp_6', name: '双龙过海 (两庄两闲)', prog: [1, 2, 4, 8, 16, 32], dirs: ['banker', 'banker', 'player', 'player', 'banker', 'banker'] },
+        { id: 'bpp_5', name: '一庄两闲 (破局防守)', prog: [1, 2, 3, 5, 8], dirs: ['banker', 'player', 'player', 'banker', 'player'] },
+        { id: 'flat_jump_5', name: '五式单跳 (纯平注测路)', prog: [1, 1, 1, 1, 1], dirs: ['banker', 'player', 'banker', 'player', 'banker'] }
       ],
-      activeFormulaId: 'jump_5',
-      formulaStatus: 'idle', // idle, running, won, lost
+      activeFormulaId: 'jump_b_5',
+      formulaStatus: 'idle', 
       currentStep: 0,
       
-      // UI交互
       showFormulaModal: false,
       lastTapTime: 0,
-      tapTimer: null
+      tapTimer: null,
+
+      // 基码选择相关
+      showBaseUnitModal: false,
+      lastBaseTapTime: 0,
+      baseTapTimer: null
     }
   },
   computed: {
-    activeFormula() {
-      return this.formulas.find(f => f.id === this.activeFormulaId);
-    },
-    targetSide() {
-      return this.activeFormula.dirs[this.currentStep];
-    },
-    currentProgression() {
-      return this.activeFormula.prog[this.currentStep];
-    },
-    trackerClass() {
-      return `tracker-${this.formulaStatus}`;
-    }
+    activeFormula() { return this.formulas.find(f => f.id === this.activeFormulaId); },
+    targetSide() { return this.activeFormula.dirs[this.currentStep]; },
+    currentProgression() { return this.activeFormula.prog[this.currentStep]; },
+    trackerClass() { return `tracker-${this.formulaStatus}`; },
+    
+    // 实时计算金额
+    currentBetAmount() { return this.currentProgression * this.baseUnit; },
+    currentBalance() { return this.principal + this.profit; }
   },
   mounted() {
     this.resetAllRoadMatrix();
   },
   methods: {
-    // 翻译方向数组用于UI展示
-    getDirText(dirs) {
-      return dirs.map(d => d === 'banker' ? '庄' : '闲').join(' ');
-    },
+    getDirText(dirs) { return dirs.map(d => d === 'banker' ? '庄' : '闲').join(' '); },
     
-    // 移动端防抖双击判定
+    // 公式按钮双击防抖
     handleFormulaSelectClick(e) {
       const currentTime = new Date().getTime();
       const tapLength = currentTime - this.lastTapTime;
-      
       if (tapLength < 400 && tapLength > 0) {
         clearTimeout(this.tapTimer);
         this.showFormulaModal = true;
       } else {
-        this.tapTimer = setTimeout(() => {
-          this.showToast('请快速双击打开菜单');
-        }, 400);
+        this.tapTimer = setTimeout(() => { this.showToast('请快速双击打开菜单'); }, 400);
       }
       this.lastTapTime = currentTime;
+    },
+
+    // 【新增】基码按钮双击防抖
+    handleBaseUnitClick(e) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - this.lastBaseTapTime;
+      if (tapLength < 400 && tapLength > 0) {
+        clearTimeout(this.baseTapTimer);
+        this.showBaseUnitModal = true;
+      } else {
+        this.baseTapTimer = setTimeout(() => { this.showToast('请快速双击设置基码'); }, 400);
+      }
+      this.lastBaseTapTime = currentTime;
+    },
+
+    // 【新增】设置预设基码
+    setBaseUnit(val) {
+      this.baseUnit = val;
+      this.showBaseUnitModal = false;
+      this.showToast(`成功！下注基数已设为 ¥${val}`);
+    },
+
+    // 【新增】设置自定义基码
+    setCustomBaseUnit() {
+      const val = prompt('请输入您想设置的自定义基码金额:', this.baseUnit);
+      const parsed = parseInt(val);
+      if (!isNaN(parsed) && parsed > 0) {
+        this.baseUnit = parsed;
+        this.showBaseUnitModal = false;
+        this.showToast(`成功！自定义基数已设为 ¥${this.baseUnit}`);
+      } else if (val !== null) {
+        this.showToast('输入的金额无效');
+      }
     },
 
     selectFormula(id) {
@@ -293,46 +404,57 @@ createApp({
       toast.textContent = msg;
       toast.style.cssText = 'position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#FFD700;padding:2vw 4vw;border-radius:1.5vw;font-size:3.5vw;z-index:9999;font-weight:bold;white-space:nowrap;';
       document.body.appendChild(toast);
-      setTimeout(() => { toast.style.opacity = '0'; }, 1000);
-      setTimeout(() => { document.body.removeChild(toast); }, 1300);
+      setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+      setTimeout(() => { document.body.removeChild(toast); }, 1800);
     },
 
-    // 录入结果时加入公式裁判逻辑
     addRecord(result) {
-      // 如果公式正在执行中，先结算状态
+      this.historyStack.push({
+        rawHistory: [...this.rawHistory],
+        formulaStatus: this.formulaStatus,
+        currentStep: this.currentStep,
+        profit: this.profit
+      });
+
       if (this.formulaStatus === 'running') {
+        const betValue = this.currentBetAmount;
+        
         if (result === 'tie') {
-          // 【核心修改】和局：立刻重置回第一口
           this.currentStep = 0;
-          this.showToast('碰到和局，公式重新开始计算');
+          this.showToast('和局，资金退回不扣，公式进度重置');
         } else if (result === this.targetSide) {
-          // 命中！
+          this.profit += betValue;
           this.formulaStatus = 'won';
         } else {
-          // 未命中，进入下一阶
+          this.profit -= betValue;
           this.currentStep++;
+          
           if (this.currentStep >= this.activeFormula.prog.length) {
-            // 缆断了
             this.formulaStatus = 'lost';
+            this.showToast(`⚠️ 爆仓断缆！累计亏损已更新至余额`);
           }
         }
       } else if (this.formulaStatus === 'won' || this.formulaStatus === 'lost') {
-        // 如果是在出结果后继续录入，自动复位公式回到待机
         this.formulaStatus = 'idle';
       }
 
-      // 录入路单逻辑
       this.rawHistory.push(result);
       this.updateRoads();
+      this.runAIPrediction();
     },
 
     undoRecord() {
-      if (this.rawHistory.length > 0) {
-        this.rawHistory.pop();
+      if (this.historyStack.length > 0) {
+        const lastState = this.historyStack.pop();
+        this.rawHistory = lastState.rawHistory;
+        this.formulaStatus = lastState.formulaStatus;
+        this.currentStep = lastState.currentStep;
+        this.profit = lastState.profit; 
+        
         this.updateRoads();
-        // 撤销时，保险起见重置公式状态
-        this.formulaStatus = 'idle';
-        this.currentStep = 0;
+        this.runAIPrediction();
+      } else {
+        this.showToast('已经退到最初状态了');
       }
     },
 
@@ -340,10 +462,12 @@ createApp({
       this.rawHistory = [];
       this.formulaStatus = 'idle';
       this.currentStep = 0;
+      this.profit = 0; 
+      this.historyStack = []; 
       this.resetAllRoadMatrix();
+      this.runAIPrediction();
     },
 
-    // 矩阵初始化与更新逻辑
     resetAllRoadMatrix() {
       let beadMatrix = [];
       for(let c=0; c<20; c++) { let col = []; for(let r=0; r<6; r++) col.push('empty'); beadMatrix.push(col); }
@@ -361,7 +485,6 @@ createApp({
       let roadsData = this.generatePureMacauRoads(this.rawHistory);
       this.displayBeadPlate = roadsData.bead; this.displayBigRoad = roadsData.big;
       
-      // 智能滚动
       let lastValidColIndex = 0;
       for (let c = roadsData.big.length - 1; c >= 0; c--) {
         if (roadsData.big[c][0].winner !== 'empty') { lastValidColIndex = c; break; }
@@ -377,7 +500,46 @@ createApp({
       });
     },
 
-    // 路单生成算法
+    runAIPrediction() {
+      const h = this.rawHistory.filter(r => r !== 'tie');
+      const len = h.length;
+      if (len < 3) {
+        this.aiResult = null;
+        this.aiResultText = '数据积累中...';
+        this.aiReason = '至少录入 3 口有效庄闲即可激活智能推牌';
+        return;
+      }
+      const last = h[len - 1]; const prev1 = h[len - 2]; const prev2 = h[len - 3]; const prev3 = len >= 4 ? h[len - 4] : null;
+
+      if (last === prev1 && prev1 === prev2) {
+        let count = 3; for (let i = len - 4; i >= 0; i--) { if (h[i] === last) count++; else break; }
+        this.aiResult = last; 
+        this.aiReason = `发现 ${count} 连长${last === 'banker' ? '庄' : '闲'}势头，顺龙而下！`;
+        return;
+      }
+      if (last !== prev1 && prev1 !== prev2) {
+        let count = 3; for(let i = len - 4; i >= 0; i--) { if(h[i] !== h[i+1]) count++; else break; }
+        if (count >= 3) {
+           this.aiResult = last === 'banker' ? 'player' : 'banker';
+           this.aiReason = `大路呈现 ${count} 口漂亮单跳，打断不如顺延！`;
+           return;
+        }
+      }
+      if (len >= 4 && last === prev1 && prev1 !== prev2 && prev2 === prev3) {
+        this.aiResult = last === 'banker' ? 'player' : 'banker';
+        this.aiReason = `成型经典双跳(两庄两闲)格局，此时宜切入反打！`;
+        return;
+      }
+      if (len >= 3 && last === prev1 && prev1 !== prev2) {
+        this.aiResult = last === 'banker' ? 'player' : 'banker';
+        this.aiReason = `疑似一房两厅形态，可尝试小注反打测试。`;
+        return;
+      }
+      this.aiResult = null;
+      this.aiResultText = '观望或平注';
+      this.aiReason = "当前牌局混沌震荡，未见明显路子，建议歇一口或平注。";
+    },
+
     generatePureMacauRoads(historyArray) {
       let beadMatrix = []; let bCol = [];
       for(let i=0; i<historyArray.length; i++) { bCol.push(historyArray[i]); if(bCol.length === 6) { beadMatrix.push(bCol); bCol = []; } }
